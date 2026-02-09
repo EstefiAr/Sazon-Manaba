@@ -1,0 +1,183 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Test - Sistema</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 800px;
+            margin: 50px auto;
+            padding: 20px;
+            background: #f5f5f5;
+        }
+        .card {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        .status {
+            padding: 10px;
+            margin: 5px 0;
+            border-radius: 5px;
+        }
+        .success { background: #d4edda; color: #155724; }
+        .error { background: #f8d7da; color: #721c24; }
+        button {
+            background: #007bff;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 5px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        button:hover {
+            background: #0056b3;
+        }
+        pre {
+            background: #f4f4f4;
+            padding: 10px;
+            border-radius: 5px;
+            overflow-x: auto;
+        }
+    </style>
+</head>
+<body>
+    <h1>🔍 Test del Sistema La Sazón Manaba</h1>
+    
+    <div class="card">
+        <h2>Estado del Sistema</h2>
+        <div id="system-status"></div>
+    </div>
+
+    <div class="card">
+        <h2>Datos del Sistema</h2>
+        <button onclick="checkMesas()">Verificar Mesas</button>
+        <button onclick="checkMenu()">Verificar Menú</button>
+        <button onclick="resetSystem()">Reiniciar Sistema</button>
+        <button onclick="initializeMesas()">Inicializar Mesas</button>
+        <div id="data-output"></div>
+    </div>
+
+    <div class="card">
+        <h2>Acciones Rápidas</h2>
+        <button onclick="activateAllMesas()">Activar Todas las Mesas</button>
+        <button onclick="goToAdmin()">Ir al Panel Admin</button>
+        <button onclick="goToClient()">Ir al Cliente</button>
+    </div>
+
+    <script src="js/app.js"></script>
+    <script>
+        function checkSystem() {
+            const statusDiv = document.getElementById('system-status');
+            let html = '';
+            
+            // Verificar app
+            if (typeof app !== 'undefined') {
+                html += '<div class="status success">✅ App cargada correctamente</div>';
+                
+                // Verificar mesas
+                if (app.mesas && app.mesas.length > 0) {
+                    html += `<div class="status success">✅ ${app.mesas.length} mesas encontradas</div>`;
+                } else {
+                    html += '<div class="status error">❌ No hay mesas en el sistema</div>';
+                }
+                
+                // Verificar menú
+                if (app.menu) {
+                    html += `<div class="status success">✅ Menú cargado (${app.menu.especialidades.length} especialidades, ${app.menu.menuDia.length} menú del día)</div>`;
+                } else {
+                    html += '<div class="status error">❌ Menú no encontrado</div>';
+                }
+                
+                // Verificar localStorage
+                const mesasStorage = localStorage.getItem('restaurant_mesas');
+                if (mesasStorage) {
+                    html += '<div class="status success">✅ Datos guardados en LocalStorage</div>';
+                } else {
+                    html += '<div class="status error">⚠️ No hay datos en LocalStorage</div>';
+                }
+                
+            } else {
+                html += '<div class="status error">❌ App no está cargada</div>';
+            }
+            
+            statusDiv.innerHTML = html;
+        }
+
+        function checkMesas() {
+            const output = document.getElementById('data-output');
+            if (typeof app !== 'undefined' && app.mesas) {
+                output.innerHTML = '<h3>Mesas del Sistema:</h3><pre>' + 
+                    JSON.stringify(app.mesas, null, 2) + '</pre>';
+            } else {
+                output.innerHTML = '<div class="status error">No se pueden cargar las mesas</div>';
+            }
+        }
+
+        function checkMenu() {
+            const output = document.getElementById('data-output');
+            if (typeof app !== 'undefined' && app.menu) {
+                output.innerHTML = '<h3>Menú del Sistema:</h3><pre>' + 
+                    JSON.stringify(app.menu, null, 2) + '</pre>';
+            } else {
+                output.innerHTML = '<div class="status error">No se puede cargar el menú</div>';
+            }
+        }
+
+        function resetSystem() {
+            if (confirm('¿Estás seguro de que quieres reiniciar el sistema? Se borrarán todos los datos.')) {
+                localStorage.clear();
+                alert('Sistema reiniciado. Recargando página...');
+                window.location.reload();
+            }
+        }
+
+        function initializeMesas() {
+            if (typeof app !== 'undefined') {
+                // Forzar inicialización de mesas
+                app.mesas = app.initializeMesas();
+                app.saveData('restaurant_mesas', app.mesas);
+                alert('Mesas inicializadas correctamente');
+                checkSystem();
+                checkMesas();
+            }
+        }
+
+        function activateAllMesas() {
+            if (typeof app !== 'undefined' && app.mesas) {
+                app.mesas.forEach(mesa => {
+                    mesa.status = 'available';
+                });
+                app.saveData('restaurant_mesas', app.mesas);
+                alert(`✅ ${app.mesas.length} mesas activadas`);
+                checkSystem();
+            }
+        }
+
+        function goToAdmin() {
+            // Crear sesión de admin temporal
+            const adminSession = {
+                username: 'admin',
+                loginTime: Date.now(),
+                token: 'TEST-TOKEN-' + Date.now()
+            };
+            localStorage.setItem('admin_session', JSON.stringify(adminSession));
+            window.location.href = 'admin.html';
+        }
+
+        function goToClient() {
+            window.location.href = 'index.html';
+        }
+
+        // Ejecutar verificación al cargar
+        window.addEventListener('load', () => {
+            setTimeout(checkSystem, 500);
+        });
+    </script>
+</body>
+</html>
