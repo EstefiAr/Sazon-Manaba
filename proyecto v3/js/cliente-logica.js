@@ -13,21 +13,15 @@ document.addEventListener('DOMContentLoaded', function() {
     const urlParams = new URLSearchParams(window.location.search);
     const mesaParam = urlParams.get('mesa');
     
-    if (mesaParam) {
+    if (!mesaParam) {
+        console.log('borrado rastros de sesiones activas') ;
+        app.clearSession();
+        showMesaSelection();
+        return;
+    }
         // Si viene de un QR, intentar acceder directamente
         handleMesaAccess(mesaParam);
-    } else {
-        // Verificar si hay sesión activa
-        const session = app.getSession();
-        if (session && !app.isSessionExpired()) {
-            // Restaurar sesión
-            showMenuView(session.mesaId);
-            startSessionTimer();
-        } else {
-            // Mostrar selección de mesas
-            showMesaSelection();
-        }
-    }
+
 });
 
 // ===== VOLVER A SELECCIÓN DE MESAS =====
@@ -136,31 +130,37 @@ function renderMesas() {
 // ===== MANEJAR ACCESO A MESA =====
 function handleMesaAccess(mesaId) {
     const mesa = app.getMesa(mesaId);
-    
+    const session = app.getSession();
     if (!mesa) {
         app.showToast('Mesa no encontrada', 'error');
         return;
     }
-    
+    if(mesa.status === 'occupied'){
+        if(session && session.mesaId === parseInt(mesaId) && mesa.customerId === session.id){
+            showMenuView(mesaId);
+            startSessionTimer();
+            return;
+        }else{
+            app.showToast('Esta mesa está ocupada. Por favor, selecciona otra.', 'warning');
+            app.clearSession();
+            window.history.pushState({}, '', window.location.pathname);
+            showMesaSelection();
+        }   
+        return;
+    }
     // Verificar estado de la mesa
     if (mesa.status === 'inactive') {
         app.showToast('Esta mesa no está disponible', 'warning');
-        return;
-    }
-    
-    if (mesa.status === 'occupied') {
-        app.showToast('Esta mesa está ocupada. Por favor, selecciona otra.', 'warning');
+        showMesaSelection();
         return;
     }
     
     // Mesa disponible - ocuparla
-    const session = app.createSession(mesaId);
-    app.occupyMesa(mesaId, session.id);
-    
+    const newSession = app.createSession(mesaId);
+    app.occupyMesa(mesaId, newSession.id);
     // Mostrar vista del menú
     showMenuView(mesaId);
     startSessionTimer();
-    
     app.showToast(`Bienvenido a la Mesa ${mesaId}`, 'success');
 }
 
@@ -258,7 +258,6 @@ function renderMenuDia() {
     }
     
     container.innerHTML = '';
-    
     const menuDia = app.getActiveMenuDia();
     
     if (menuDia.length === 0) {
@@ -470,13 +469,42 @@ console.log('✅ Lógica del cliente inicializada');
 // ===== EXPORTAR FUNCIONES GLOBALES =====
 window.returnToMesaSelection = returnToMesaSelection;
 
-// Escuchar cambios del administrador en tiempo real
+// ⭐ SINCRONIZACIÓN EN TIEMPO REAL - Escuchar cambios del administrador
 window.addEventListener('storage', (event) => {
+    // Cambios en las mesas
     if (event.key === CONFIG.STORAGE_KEYS.MESAS) {
-        // ... (tu código actual de mesas)
+        app.mesas = app.loadData(CONFIG.STORAGE_KEYS.MESAS);
+        const mesaSection = document.getElementById('mesa-selection');
+        if(mesaSection && mesaSection.offsetParent !== null){
+            renderMesas();
+        }
+        const session = app.getSession();
+        if (session) {
+            const currentMesa = app.getMesa(session.mesaId);
+            if(currentMesa && currentMesa.status === 'inactive'){
+                alert('Esta mesa ha sido desactivada por el administrador. Por favor, selecciona otra mesa.');
+                app.clearSession();
+                window.location.href = 'index.html';
+            }
+        }
     }
-
-    // NUEVO: Detectar cuando el admin cambia el estado de un pedido (ej: a "Listo")
+    
+    // ⭐ NUEVO: Detectar cambios en el MENÚ (activar/desactivar platos)
+    if (event.key === CONFIG.STORAGE_KEYS.MENU) {
+        console.log('🍽️ Actualización de menú detectada en tiempo real');
+        // Recargar datos del menú
+        app.menu = app.loadData(CONFIG.STORAGE_KEYS.MENU);
+        
+        // Verificar si el usuario está viendo el menú
+        const menuView = document.getElementById('menu-view');
+        if (menuView && menuView.style.display !== 'none') {
+            // Re-renderizar las secciones del menú para reflejar los cambios
+            renderMenu();
+            app.showToast('El menú ha sido actualizado', 'info');
+        }
+    }
+    
+    // Detectar cuando el admin cambia el estado de un pedido (ej: a "Listo")
     if (event.key === CONFIG.STORAGE_KEYS.ORDERS) {
         console.log('🔔 Actualización de pedido recibida');
         app.orders = app.loadData(CONFIG.STORAGE_KEYS.ORDERS);
@@ -495,11 +523,21 @@ window.addEventListener('storage', (event) => {
     }
 });
 
+// Sincronizar cuando el usuario vuelve a la pestaña
 window.addEventListener('focus', () => {
     console.log('👀 Pestaña activa, sincronizando datos...');
+    
+    // Recargar mesas
     app.mesas = app.loadData(CONFIG.STORAGE_KEYS.MESAS);
     const mesaSection = document.getElementById('mesa-selection');
     if (mesaSection && mesaSection.style.display !== 'none') {
         renderMesas();
+    }
+    
+    // ⭐ NUEVO: Recargar menú si está visible
+    app.menu = app.loadData(CONFIG.STORAGE_KEYS.MENU);
+    const menuView = document.getElementById('menu-view');
+    if (menuView && menuView.style.display !== 'none') {
+        renderMenu();
     }
 });

@@ -432,10 +432,54 @@ body {
 
 .order-actions {
     display: flex;
-    gap: 1rem;
-    margin-top: 1rem;
+    gap: 12px;
+    margin-top: 15px;
+}
+.order-actions button{
+    flex: 1;
+    padding: 12px 20px;
+    border: none;
+    border-radius: 12px;
+    font-weight: 700;
+    font-size: 0.9rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    box-shadow: var(--shadow);
 }
 
+.btn-approve-order{
+    background: linear-gradient(135deg, #689f38, #558B2F);
+    color: white;
+}
+
+.btn-approve-order:hover {
+    background:linear-gradient(135deg, #7cb342, #689f38);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+.btn-reject-order{
+    background: linear-gradient(135deg, #8D0606, #710505);
+    color: white;
+}
+
+.btn-reject-order:hover {
+    background: linear-gradient(135deg, #a50808, #8D0606);
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
+
+.btn-ready-order{
+    background: linear-gradient(135deg, var(--primary), var(--primary-dark));
+    color: white;
+}
+
+.btn-ready-order:hover{
+    background: linear-gradient(135deg, var(--secondary), var(--primary));
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-lg);
+}
 .btn-approve {
     flex: 1;
     background: var(--success);

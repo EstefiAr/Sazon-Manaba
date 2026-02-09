@@ -80,8 +80,7 @@
             <!-- Vista: Pedidos Activos -->
             <section id="view-pedidos" class="content-view">
                 <div class="view-controls">
-                    <h3>Órdenes en Proceso</h3>
-                    
+                    <h3>Órdenes en Proceso</h3>    
                 </div>
 
                 <div class="orders-container" id="orders-list">
@@ -100,7 +99,7 @@
                     <div class="menu-section">
                         <div class="section-header">
                             <h3>⭐ Especialidades de la Casa</h3>
-                            
+                            <button class="btn-add" onclick="addMenuItem()">+ Agregar</button>
                         </div>
                         <div class="menu-items-list" id="especialidades-admin">
                             <!-- Items generados dinámicamente -->
@@ -110,7 +109,7 @@
                     <div class="menu-section">
                         <div class="section-header">
                             <h3>📅 Menú del Día</h3>
-                            
+                            <button class="btn-add" onclick="addMenuItem()">+ Agregar</button>
                         </div>
                         <p class="section-note">Los platos del menú del día pueden activarse/desactivarse diariamente</p>
                         <div class="menu-items-list" id="menu-dia-admin">
@@ -187,12 +186,22 @@
                 <form id="dish-form" class="dish-form">
                     <div class="form-group">
                         <label>Nombre del Plato *</label>
-                        <input type="text" id="dish-name" placeholder="Ej: Encebollado" required>
+                        <input type="text" id="dish-name" placeholder="Ej: Capuccino Vainilla" required>
                     </div>
 
                     <div class="form-group">
                         <label>Descripción</label>
                         <textarea id="dish-description" rows="3" placeholder="Descripción breve del plato"></textarea>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Foto del Plato *</label>
+                        <input type="file" id="dish-image-file" accept="image/*" class="form-control">
+
+                        <div id="image-preview-container" style="margin-top: 15px; display: none; text-align: center;">
+                            <p style="font-size: 0.8rem; color: var(--gray-600);margin-bottom: 5px;">Vista previa de la imagen:</p>
+                            <img id="dish-image-preview" src="" style="width: 120px; height: 120px; object-fit: cover; border-radius: 12px; border: 3px solid var(--primary); box-shadow: var(--shadow);">
+                        </div>
                     </div>
 
                     <div class="form-row">
@@ -210,17 +219,7 @@
                         </div>
                     </div>
 
-                    <div class="form-group">
-                        <label>
-                            <input type="checkbox" id="dish-customizable">
-                            Permitir personalización (sin cebolla, etc.)
-                        </label>
-                    </div>
-
                     <div class="form-actions">
-                        <button type="button" class="btn-secondary" onclick="closeDishModal()">
-                            Cancelar
-                        </button>
                         <button type="submit" class="btn-primary">
                             Guardar
                         </button>
