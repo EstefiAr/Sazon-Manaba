@@ -1,0 +1,260 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafeteria Endulce - Panel Admin</title>
+    <link rel="stylesheet" href="css/estilos-admin.css">
+</head>
+<body>
+    <div class="admin-container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="sidebar-header">
+                <div class="logo-circle">☕</div>
+                <h2>Cafeteria Endulce</h2>
+            </div>
+
+            <nav class="sidebar-nav">
+                <button class="nav-item active" data-view="mesas">
+                    🪑 Gestión de Mesas
+                </button>
+                <button class="nav-item" data-view="pedidos">
+                    📋 Pedidos Activos
+                </button>
+                <button class="nav-item" data-view="menu">
+                    📖 Gestión de Menú
+                </button>
+                <button class="nav-item" data-view="historial">
+                    📊 Historial
+                </button>
+            </nav>
+
+            <div class="sidebar-footer">
+                <div class="user-info">
+                    <span class="user-icon">👤</span>
+                    <span id="admin-name">Administrador</span>
+                </div>
+                <button class="btn-logout" onclick="logout()">
+                    Cerrar Sesión
+                </button>
+            </div>
+        </aside>
+
+        <!-- Main Content -->
+        <main class="main-content">
+            <header class="content-header">
+                <h1 id="view-title">Gestión de Mesas</h1>
+                <div class="header-actions">
+                    <div class="datetime" id="current-datetime"></div>
+                </div>
+            </header>
+
+            <!-- Vista: Gestión de Mesas -->
+            <section id="view-mesas" class="content-view active">
+                <div class="view-controls">
+                    <h3>Control de Disponibilidad</h3>
+                    <p class="help-text">Habilita o deshabilita mesas para permitir acceso a los clientes</p>
+                </div>
+
+                <div class="mesas-grid">
+                    <!-- Mesas generadas dinámicamente -->
+                </div>
+
+                <div class="legend">
+                    <div class="legend-item">
+                        <span class="status-dot available"></span>
+                        <span>Disponible</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="status-dot occupied"></span>
+                        <span>Ocupada</span>
+                    </div>
+                    <div class="legend-item">
+                        <span class="status-dot inactive"></span>
+                        <span>Inactiva</span>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista: Pedidos Activos -->
+            <section id="view-pedidos" class="content-view">
+                <div class="view-controls">
+                    <h3>Órdenes en Proceso</h3>
+                    
+                </div>
+
+                <div class="orders-container" id="orders-list">
+                    <!-- Pedidos generados dinámicamente -->
+                </div>
+
+                <div class="empty-state" id="empty-orders" style="display: none;">
+                    <div class="empty-icon">📭</div>
+                    <p>No hay pedidos activos</p>
+                </div>
+            </section>
+
+            <!-- Vista: Gestión de Menú -->
+            <section id="view-menu" class="content-view">
+                <div class="menu-management">
+                    <div class="menu-section">
+                        <div class="section-header">
+                            <h3>⭐ Especialidades de la Casa</h3>
+                            
+                        </div>
+                        <div class="menu-items-list" id="especialidades-admin">
+                            <!-- Items generados dinámicamente -->
+                        </div>
+                    </div>
+
+                    <div class="menu-section">
+                        <div class="section-header">
+                            <h3>📅 Menú del Día</h3>
+                            
+                        </div>
+                        <p class="section-note">Los platos del menú del día pueden activarse/desactivarse diariamente</p>
+                        <div class="menu-items-list" id="menu-dia-admin">
+                            <!-- Items generados dinámicamente -->
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Vista: Historial -->
+            <section id="view-historial" class="content-view">
+                <div class="view-controls">
+                    <h3>Historial de Pedidos</h3>
+                    <div class="filter-controls">
+                        <input type="date" id="filter-date" class="date-filter">
+                        <button class="btn-filter" onclick="filterHistory()">Filtrar</button>
+                    </div>
+                </div>
+
+                <div class="history-list" id="history-list">
+                    <!-- Historial generado dinámicamente -->
+                </div>
+            </section>
+        </main>
+
+        <!-- Modal: Detalle de Mesa -->
+        <div id="mesa-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Mesa <span id="modal-mesa-number"></span></h2>
+                    <button class="close-modal" onclick="closeMesaModal()">&times;</button>
+                </div>
+
+                <div class="mesa-details">
+                    <div class="detail-row">
+                        <span>Estado:</span>
+                        <span class="mesa-status" id="modal-mesa-status"></span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Tiempo Activo:</span>
+                        <span id="modal-mesa-time">-</span>
+                    </div>
+                    <div class="detail-row">
+                        <span>Pedidos:</span>
+                        <span id="modal-mesa-orders">0</span>
+                    </div>
+                </div>
+
+                <div class="mesa-actions">
+                    <button class="btn-toggle" id="toggle-mesa-btn" onclick="toggleMesa()">
+                        Cambiar Estado
+                    </button>
+                    <button class="btn-reset" onclick="resetMesa()">
+                        Reiniciar Mesa
+                    </button>
+                </div>
+
+                <div class="qr-section">
+                    <h3>Código QR de la Mesa</h3>
+                    <div class="qr-code" id="qr-code"></div>
+                    <p class="qr-url" id="qr-url"></p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Modal: Agregar/Editar Plato -->
+        <div id="dish-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2 id="dish-modal-title">Agregar Plato</h2>
+                    <button class="close-modal" onclick="closeDishModal()">&times;</button>
+                </div>
+
+                <form id="dish-form" class="dish-form">
+                    <div class="form-group">
+                        <label>Nombre del Plato *</label>
+                        <input type="text" id="dish-name" placeholder="Ej: Encebollado" required>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Descripción</label>
+                        <textarea id="dish-description" rows="3" placeholder="Descripción breve del plato"></textarea>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group">
+                            <label>Precio *</label>
+                            <input type="number" id="dish-price" step="0.01" min="0" placeholder="0.00" required>
+                        </div>
+
+                        <div class="form-group">
+                            <label>Categoría *</label>
+                            <select id="dish-category" required>
+                                <option value="especialidad">Especialidad</option>
+                                <option value="menu-dia">Menú del Día</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div class="form-group">
+                        <label>
+                            <input type="checkbox" id="dish-customizable">
+                            Permitir personalización (sin cebolla, etc.)
+                        </label>
+                    </div>
+
+                    <div class="form-actions">
+                        <button type="button" class="btn-secondary" onclick="closeDishModal()">
+                            Cancelar
+                        </button>
+                        <button type="submit" class="btn-primary">
+                            Guardar
+                        </button>
+                    </div>
+                </form>
+            </div>
+        </div>
+
+        <!-- Modal: Confirmar Pedido -->
+        <div id="confirm-order-modal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Confirmar Pedido</h2>
+                    <button class="close-modal" onclick="closeConfirmOrderModal()">&times;</button>
+                </div>
+
+                <div class="order-confirmation" id="order-confirmation-details">
+                    <!-- Detalles del pedido -->
+                </div>
+
+                <div class="confirmation-actions">
+                    <button class="btn-danger" onclick="rejectOrder()">
+                        Rechazar
+                    </button>
+                    <button class="btn-success" onclick="approveOrder()">
+                        Confirmar Pedido
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+    <script src="js/app.js"></script>
+    <script src="js/admin.js"></script>
+</body>
+</html>

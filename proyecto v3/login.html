@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Cafetería Endulce - Acceso Administrador</title>
+    <link rel="stylesheet" href="css/estilos-login.css">
+</head>
+<body>
+    <div class="background-slideshow">
+        <div class="slide"></div>
+        <div class="slide"></div>
+        <div class="slide"></div>
+    </div>
+
+    <div class="login-container">
+        <div class="login-card">
+            <div class="logo-section">
+                <div class="logo-circle">☕</div>
+                <h1>Cafetería Endulce</h1>
+                <p class="subtitle">"El arte de endulzar el momento"</p>
+            </div>
+
+            <form id="login-form" class="login-form">
+                <div class="form-group">
+                    <label for="username">Usuario</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">👤</span>
+                        <input 
+                            type="text" 
+                            id="username" 
+                            placeholder="Ingrese su usuario" 
+                            autocomplete="username" 
+                            required
+                        >
+                    </div>
+                </div>
+
+                <div class="form-group">
+                    <label for="password">Contraseña</label>
+                    <div class="input-wrapper">
+                        <span class="input-icon">🔒</span>
+                        <input 
+                            type="password" 
+                            id="password" 
+                            placeholder="Ingrese su contraseña" 
+                            autocomplete="current-password" 
+                            required
+                        >
+                    </div>
+                </div>
+
+                <button type="submit" class="btn-login">
+                    Entrar al Panel
+                </button>
+            </form>
+
+            <div class="login-footer">
+                <p class="restricted-text">🔐 Área restringida para el equipo Endulce</p>
+            </div>
+
+            <div class="demo-credentials">
+                <p><strong>Acceso Demo:</strong></p>
+                <p>Usuario: <code>admin</code> | Clave: <code>admin123</code></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="toast-container"></div>
+
+    <script src="js/login.js"></script>
+</body>
+</html>
